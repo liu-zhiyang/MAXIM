@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -- coding:utf-8 --
-# Last-modified: 24 Apr 2019 08:52:13 AM
+# Last-modified: 24 Jan 2020 12:20:11 PM
 #
 #         Module/Scripts Description
 # 
-# Copyright (c) 2017 The Unversity of Texas at Dallas
+# Copyright (c) 2019 The Unversity of Texas at Dallas
 # 
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the BSD License (see the file COPYING included with
 # the distribution).
 # 
-# @version: 1.0.0
+# @version: 2.0.0
 # @design: Yong Chen <yongchen1@utdallas.edu>
 # @implementation: Yunfei Wang <yfwang0405@gmail.com>
 # @corresponding author:  Michael Q. Zhang <michael.zhang@utdallas.edu>
@@ -76,7 +76,7 @@ class Fastq(Fasta):
         self.qual = qual
     def __str__(self):
         ''' String for output of Fastq. '''
-        return "@{0}\n{1}\n+\n{2}".format(self.id,self.seq, len(self.qual)==self.length() and self.qual or ''.join(['I' for i in xrange(self.length())]))
+        return "@{0}\n{1}\n+\n{2}".format(self.id,self.seq, len(self.qual)==self.length() and self.qual or ''.join(['I' for i in range(self.length())]))
 
 class TabixFile(object):
     '''
@@ -113,7 +113,7 @@ class TabixFile(object):
             rlen = 0
             for i in range(10):
                 try:
-                    read = sam.next()
+                    read = next(sam)
                     rlen = max(read.rlen,rlen)
                 except:
                     pass
@@ -275,7 +275,7 @@ class TabixFile(object):
         Utils.touchtime("Negative Binomial fitting ...")
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore")
-            ns, ps = zip(*cdf.apply(Algorithms.NBFit,axis=0))
+            ns, ps = list(zip(*cdf.apply(Algorithms.NBFit,axis=0)))
         if outfile:
             cdf.to_csv(outfile,sep='\t',index=None)
         self.intra_nb = pandas.DataFrame({'r':ns,'p':ps},index=cdf.columns)
@@ -296,7 +296,7 @@ class TabixFile(object):
             inter_counts: numpy.array
                 counts of inter-chrom links.
         '''
-        chroms, sizes = zip(*[(chrom,size) for chrom,size in zip(self.chroms,self.sizes) if chrom!=self.bait_chrom and size>binsize])
+        chroms, sizes = list(zip(*[(chrom,size) for chrom,size in zip(self.chroms,self.sizes) if chrom!=self.bait_chrom and size>binsize]))
         inter_counts = {chrom:numpy.zeros(nperm,dtype=numpy.uint16) for chrom in chroms}
 
         rs = numpy.random.RandomState(seed=seed)
@@ -392,10 +392,10 @@ class TabixFile(object):
                 if chr1 == chr2 : # intra
                     pcname = 'bin_{0}'.format(nbins if abs(idx) >nbins else abs(idx))
                     p = 1-stats.nbinom.cdf(intra_counts[idx],self.intra_nb.loc[pcname,'r'], self.intra_nb.loc[pcname,'p'])
-                    print >>ofh, "{0}:{1}-{2}\t{3}:{4}-{5}\t{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,min(150,numpy.ceil((1-p)/p/1000)))
+                    print("{0}:{1}-{2}\t{3}:{4}-{5}\t{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,min(150,numpy.ceil((1-p)/p/1000))), file=ofh)
                 elif chr2 in self.inter_ns: # inter
                     p = 1-stats.nbinom.cdf(inter_counts[chr2][idx],self.inter_ns[chr2],self.inter_ps[chr2])
-                    print >>ofh, "{0}:{1}-{2}\t{3}:{4}-{5}\t{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,-min(150,numpy.ceil((1-p)/p/100)))
+                    print("{0}:{1}-{2}\t{3}:{4}-{5}\t{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,-min(150,numpy.ceil((1-p)/p/100))), file=ofh)
 
 class IO(object):
     def mopen(infile,mode='r'):
@@ -413,7 +413,7 @@ class IO(object):
         # Read lines
         with IO.mopen(infile) as fh:
             if ftype=='fasta':
-                line = fh.next()
+                line = next(fh)
                 if line[0] != ">":
                     raise ValueError("Records in Fasta files should start with '>' character")
                 line = line.lstrip('>').rstrip().replace('\t',' ').split(' ')
@@ -422,7 +422,7 @@ class IO(object):
                 seq = ''
                 while True:
                     try:
-                        line = fh.next()
+                        line = next(fh)
                     except:
                         if seq != '':
                             yield Fasta(name, seq, desc)
@@ -440,7 +440,7 @@ class IO(object):
                     try:
                         fid=fh.next().rstrip().lstrip('@')
                         seq=fh.next().rstrip()
-                        fh.next()
+                        next(fh)
                         qual = fh.next().rstrip()
                         yield Fastq(fid,seq,qual)
                     except:
@@ -525,7 +525,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
                 else:
                     fq.seq = fq.seq[:idx+4]
                     fq.qual = fq.qual[:idx+4]
-                print >>ofh, fq
+                print(fq, file=ofh)
         Utils.touchtime("Read with GATC sites: {0} out {1} reads.".format(cnt,total))
     ParseGATCSites=staticmethod(ParseGATCSites)
     def _RmDup3():
@@ -539,12 +539,12 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
                 continue
             if items[2]!=curchr or items[3]!=curpos:
                 for read in reads:
-                    print "{0}\t{1}\t{2}".format(curchr,curpos,read)
+                    print("{0}\t{1}\t{2}".format(curchr,curpos,read))
                 curchr,curpos = items[2], items[3]
                 reads = set()
             reads.add("{0}\t{1}".format(items[2] if items[6]=='=' else items[6],items[7]))
         for read in reads:
-            print "{0}\t{1}\t{2}".format(curchr,curpos,read)
+            print("{0}\t{1}\t{2}".format(curchr,curpos,read))
     _RmDup3=staticmethod(_RmDup3)
     def _RmDup():
         '''
@@ -596,7 +596,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
             for curpos in sorted(pairs[curchr]):
                 for chrom in sorted(pairs[curchr][curpos]):
                     for pos in sorted(pairs[curchr][curpos][chrom]):
-                        print "{0}\t{1}\t{2}\t{3}".format(curchr,curpos,chrom,pos)
+                        print("{0}\t{1}\t{2}\t{3}".format(curchr,curpos,chrom,pos))
     _RmDup=staticmethod(_RmDup)
     def FixMatePairs(bams,prefix,nproc=1,overwrite=False):
         '''
@@ -687,7 +687,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
         from bisect import bisect_left
         rs = numpy.random.RandomState(seed=seed)
         # remove short chromosomes
-        schroms, ssizes = zip(*[(chrom,size) for chrom, size in zip(chroms,sizes) if size >binsize])
+        schroms, ssizes = list(zip(*[(chrom,size) for chrom, size in zip(chroms,sizes) if size >binsize]))
         cumsizes = (numpy.array(ssizes)-binsize).cumsum()
         for pos in rs.randint(0,cumsizes[-1],nloci):
             idx = bisect_left(cumsizes,pos)
@@ -703,7 +703,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
             unmapped, low_qual, high_qual: int
         '''
         # map
-        print prefix
+        print(prefix)
         with open(prefix+"_bowtie2.log") as fh:
             start = fh.tell()
             fh.seek(0,2) 
