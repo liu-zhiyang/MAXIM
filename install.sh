@@ -11,7 +11,7 @@
 #  
 #  @status:  experimental
 #  @version: $Revision$
-#  @author:  Yunfei Wang
+#  @author:  Yunfei Wang, Yong Chen
 #  @contact: tszn1984@gmail.com
 #
 #########################################################################
