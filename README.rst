@@ -1,5 +1,7 @@
-C3S: model-based analysis and pipeline of dCas9 Capture-3C-Seq data
+MAXIM is a model-based analysis and pipeline of dCas9 Capture-3C-Seq data of multiplexed version.
 =============================
+MAXIM provides a versatile and flexible pipeline to analyze the dCas9 Capture-3C-Seq data V2.0 from raw sequencing reads to chromatin loops. MAXIM integrates all steps required for the data analysis, and it supports the multiplexed version that uses batchs of multiple targets (sgRNAs) in one experiments.
+
 
 1. Prerequisition
 -------------------
@@ -23,18 +25,18 @@ C3S: model-based analysis and pipeline of dCas9 Capture-3C-Seq data
 
 ::
 
-  > git clone https://github.com/YONGCHENUTD/C3S.git
-  > cd C3S
+  > git clone https://github.com/YONGCHENUTD/MAXIM.git
+  > cd MAXIM
   > python setup.py install --user
 
-3. Usage of C3S
+3. Usage of MAXIM
 ----------------
 
-- Usage of runC3S.py
+- Usage of runMAXIM.py
 
 ::
 
-  usage: runC3S.py -x hg38 -1 sample_R1.fastq.gz [sample_R1.fastq.gz ...] -2
+  usage: runMAXIM.py -x hg38 -1 sample_R1.fastq.gz [sample_R1.fastq.gz ...] -2
                  sample_R2.fastq.gz [sample_R2.fastq.gz ...] --prefix prefix
                  [--bait chr11:5305934] [--extendsize 100000] [--readlen 36]
                  [--seed 1024] [--smooth-window 100] [--nperm 10000] [-w "."]
@@ -88,8 +90,8 @@ C3S: model-based analysis and pipeline of dCas9 Capture-3C-Seq data
   # Build Bowtie2 genome
   > bowtie2-build hg38_basic.fa hg38_basic
   
-  # run runC3S.py on fastq data
-  > runC3S.py -x hg38_basic -1 K562_dCas9_sg3-HS1_3C-Capture_R1.fastq.gz \
+  # run runmaxim.py on fastq data
+  > runMAXIM.py -x hg38_basic -1 K562_dCas9_sg3-HS1_3C-Capture_R1.fastq.gz \
   -2 K562_dCas9_sg3-HS1_3C-Capture_R2.fastq.gz --prefix sg3-HS1 -w sg3-HS1_raw \
   --bait 'chr11:5226276' 
 
