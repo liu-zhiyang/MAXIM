@@ -25,7 +25,7 @@ import pandas
 import argparse
 
 
-import c3s
+import maxim
 
 # ------------------------------------
 # constants
@@ -37,7 +37,7 @@ import c3s
 
 def argParser():
     ''' Parse arguments. '''
-    p=argparse.ArgumentParser(description='C3S: model-based analysis and pipeline of dCas9 Capture-3C-Seq data.',add_help=False,epilog='dependency numpy, scipy, pandas, pysam, statsmodels')
+    p=argparse.ArgumentParser(description='MAXIM: model-based analysis and pipeline of dCas9 Capture-3C-Seq data.',add_help=False,epilog='dependency numpy, scipy, pandas, pysam, statsmodels')
 
     pr = p.add_argument_group('Required')
     pr.add_argument("-x","--genome",dest="genome",type=str,metavar="hg38", required=True, help="Bowtie2 built genome.")
@@ -75,9 +75,9 @@ if __name__=="__main__":
     peaksize = None
     if args.peakstart!=-1 and args.peakend!=-1:
         peaksize = args.peakend - args.peakstart
-        c3s.Utils.touchtime("Use user defined peak size.")
+        maxim.Utils.touchtime("Use user defined peak size.")
     elif args.peakstart!=-1 or args.peakend!=-1:
-        c3s.Utils.touchtime("ERROR: both '--peakstart' and '--peakend' should be provided.")
+        maxim.Utils.touchtime("ERROR: both '--peakstart' and '--peakend' should be provided.")
 
     # Mapping reads to genome
     if "-" in args.bait:
@@ -85,69 +85,69 @@ if __name__=="__main__":
         args.bait = "{}:{}".format(args.bait.split(":")[0],round((int(start)+int(end))/2))
     mappingdir = args.wdir+"/010ReadMapping"
     fq1, fq2 = ",".join(args.fq1), ",".join(args.fq2)
-    mappingdir = c3s.Utils.touchdir(mappingdir)
+    mappingdir = maxim.Utils.touchdir(mappingdir)
 
     # 1st round of mapping
-    c3s.Utils.touchtime("FIRST ROUND OF MAPPING ...")
-    c3s.Utils.touchtime("MAPPING READ 1 ...")
-    c3s.Algorithms.bowtie2_SE(args.genome,fq1,args.prefix+"_R1",proc=args.proc,wdir=mappingdir,min_qual=30)
-    c3s.Utils.touchtime("MAPPING READ 2 ...")
-    c3s.Algorithms.bowtie2_SE(args.genome,fq2,args.prefix+"_R2",proc=args.proc,wdir=mappingdir,min_qual=30)
-    c3s.Utils.touchtime()
+    maxim.Utils.touchtime("FIRST ROUND OF MAPPING ...")
+    maxim.Utils.touchtime("MAPPING READ 1 ...")
+    maxim.Algorithms.bowtie2_SE(args.genome,fq1,args.prefix+"_R1",proc=args.proc,wdir=mappingdir,min_qual=30)
+    maxim.Utils.touchtime("MAPPING READ 2 ...")
+    maxim.Algorithms.bowtie2_SE(args.genome,fq2,args.prefix+"_R2",proc=args.proc,wdir=mappingdir,min_qual=30)
+    maxim.Utils.touchtime()
 
     # Split the reads by GATC sites and take the larger one
-    c3s.Utils.touchtime("Split read by GATC sites ...")
-    c3s.Algorithms.ParseGATCSites("{0}/{1}_R1_un.fastq.gz".format(mappingdir,args.prefix),"{0}/{1}_R1_split.fastq.gz".format(mappingdir,args.prefix))
-    c3s.Algorithms.ParseGATCSites("{0}/{1}_R2_un.fastq.gz".format(mappingdir,args.prefix),"{0}/{1}_R2_split.fastq.gz".format(mappingdir,args.prefix))
-    c3s.Utils.touchtime()
+    maxim.Utils.touchtime("Split read by GATC sites ...")
+    maxim.Algorithms.ParseGATCSites("{0}/{1}_R1_un.fastq.gz".format(mappingdir,args.prefix),"{0}/{1}_R1_split.fastq.gz".format(mappingdir,args.prefix))
+    maxim.Algorithms.ParseGATCSites("{0}/{1}_R2_un.fastq.gz".format(mappingdir,args.prefix),"{0}/{1}_R2_split.fastq.gz".format(mappingdir,args.prefix))
+    maxim.Utils.touchtime()
 
     # 2nd round of mapping
-    c3s.Utils.touchtime("SECOND ROUND OF MAPPING ...")
-    c3s.Utils.touchtime("MAPPING READ 1 ...")
-    c3s.Algorithms.bowtie2_SE(args.genome,"{0}/{1}_R1_split.fastq.gz".format(mappingdir,args.prefix),args.prefix+"_R1_remap",min_qual=30,proc=args.proc,wdir=mappingdir)
-    c3s.Utils.touchtime("MAPPING READ 2 ...")
-    c3s.Algorithms.bowtie2_SE(args.genome,"{0}/{1}_R2_split.fastq.gz".format(mappingdir,args.prefix),args.prefix+"_R2_remap",min_qual=30,proc=args.proc,wdir=mappingdir)
-    c3s.Utils.touchtime()
+    maxim.Utils.touchtime("SECOND ROUND OF MAPPING ...")
+    maxim.Utils.touchtime("MAPPING READ 1 ...")
+    maxim.Algorithms.bowtie2_SE(args.genome,"{0}/{1}_R1_split.fastq.gz".format(mappingdir,args.prefix),args.prefix+"_R1_remap",min_qual=30,proc=args.proc,wdir=mappingdir)
+    maxim.Utils.touchtime("MAPPING READ 2 ...")
+    maxim.Algorithms.bowtie2_SE(args.genome,"{0}/{1}_R2_split.fastq.gz".format(mappingdir,args.prefix),args.prefix+"_R2_remap",min_qual=30,proc=args.proc,wdir=mappingdir)
+    maxim.Utils.touchtime()
 
     # Fix mate pairs
-    c3s.Utils.touchtime("Merge bam files and fix mate pairs ...")
+    maxim.Utils.touchtime("Merge bam files and fix mate pairs ...")
     bams = [mappingdir+args.prefix+f for f in ["_R1.bam", "_R2.bam", "_R1_remap.bam", "_R2_remap.bam"]]
-    tbffile = c3s.Algorithms.FixMatePairs(bams,mappingdir+args.prefix,args.proc)
-    c3s.Utils.touchtime()
+    tbffile = maxim.Algorithms.FixMatePairs(bams,mappingdir+args.prefix,args.proc)
+    maxim.Utils.touchtime()
 
     # Infer peak characteristics from the bait region
     plotdir = args.wdir+"/020Plotting"
-    plotdir = c3s.Utils.touchdir(plotdir)
-    c3s.Utils.touchtime("Draw bait figures ...")
-    tbf = c3s.TabixFile(tbffile,peaksize)
+    plotdir = maxim.Utils.touchdir(plotdir)
+    maxim.Utils.touchtime("Draw bait figures ...")
+    tbf = maxim.TabixFile(tbffile,peaksize)
     tbf.setChromSizes(bams[0])    
     tbf.BaitStatsPlot(args.bait,
                       plotdir+args.prefix+"_stats.pdf",
                       extendsize=args.extendsize,
                       readlen=args.readlen,
                       smooth_window=args.smooth_window)
-    c3s.Utils.touchtime()
+    maxim.Utils.touchtime()
 
     # Calculate intra- and inter-chrom interactions
     modeldir = args.wdir+"/030Model"
-    modeldir = c3s.Utils.touchdir(modeldir)
-    c3s.Utils.touchtime("Permutation on intra-chromosomal interactions ...")
+    modeldir = maxim.Utils.touchdir(modeldir)
+    maxim.Utils.touchtime("Permutation on intra-chromosomal interactions ...")
     ns, ps = tbf.GetIntraChromLinks(nperm=args.nperm)
     #for n,p in zip(ns,ps):
     #    print n,p
-    c3s.Utils.touchtime("Permutation on inter-chromosomal interactions ...")
+    maxim.Utils.touchtime("Permutation on inter-chromosomal interactions ...")
     n, p = tbf.GetInterChromLinks(nperm=args.nperm)
     
     #print n, p
-    c3s.Utils.touchtime()
+    maxim.Utils.touchtime()
 
     # Calculate p values for intra- and inter-chrom interactions.
-    c3s.Utils.touchtime("Calculate p values ...")
+    maxim.Utils.touchtime("Calculate p values ...")
     tbf.InferBaitPval(modeldir+args.prefix)
-    c3s.Utils.touchtime()
+    maxim.Utils.touchtime()
 
     # Ending
-    c3s.Utils.touchtime("RunC3S finished successfully. Thank you for using C3S!")
+    maxim.Utils.touchtime("RunMAXIM finished successfully. Thank you for using MAXIM!")
 
 
 
