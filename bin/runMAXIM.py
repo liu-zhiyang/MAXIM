@@ -37,7 +37,7 @@ import maxim
 
 def argParser():
     ''' Parse arguments. '''
-    p=argparse.ArgumentParser(description='MAXIM: model-based analysis and pipeline of dCas9 Capture-3C-Seq data.',add_help=False,epilog='dependency numpy, scipy, pandas, pysam, statsmodels')
+    p=argparse.ArgumentParser(description='MAXIM is a model-based analysis and pipeline of dCas9 Capture-3C-Seq data of multiplexed version. It uses multiplescale Bayesian models for the significance calling of chromatin interactions. It oprovides a versatile and flexible pipeline to analyze the dCas9 Capture-3C-Seq data V2.0 from raw sequencing reads to chromatin loops. MAXIM integrates all steps required for the data analysis, and it supports the multiplexed version that uses batchs of multiple targets (sgRNAs) in one experiments.',add_help=False,epilog='dependency numpy, scipy, pandas, pysam, statsmodels')
 
     pr = p.add_argument_group('Required')
     pr.add_argument("-x","--genome",dest="genome",type=str,metavar="hg38", required=True, help="Bowtie2 built genome.")
