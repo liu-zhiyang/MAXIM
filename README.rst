@@ -5,7 +5,7 @@ MAXIM is a model-based analysis and pipeline of dCas9 Capture-3C-Seq data of mul
 
 1. Prerequisition
 -------------------
-- Python 2.7 packages (automatically installed)
+- Python 3.7 packages (automatically installed)
 
   - numpy >= 1.13.1
   - scipy >= 0.19.1
