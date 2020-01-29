@@ -60,9 +60,6 @@ if __name__ == '__main__':
     
     # install requirement
     install_requires = [ ["numpy >= 1.4.1"]]
-    # Python 2.6 requires argparse
-    if float(sys.version[:3]) == 2.6:
-        install_requires.append(["argparse >= 1.2.1"])
     install_requires.append(["numpy >= 1.13.1",
                              "pandas >= 0.15.2",
                              "matplotlib >= 2.0.2",
@@ -76,12 +73,12 @@ if __name__ == '__main__':
           author_email='yfwang0405@gmail.com',
           url='https://github.com/tsznxx/{0}'.format(PROG),
           license="GNU General Public License (GPL)",
-          keywords = "C3S",
+          keywords = "MAXIM",
           description = (description),
           long_description = long_description,
           package_dir={PROG:'src'},
           packages = [PROG],
-          scripts=['bin/runC3S.py'],
+          scripts=['bin/runMAXIM.py','bin/runMAXIM2.py'],
           ext_modules=[],
           classifiers=['Environment :: Console',
                        'Development Status :: 3 - Alpha',
@@ -89,7 +86,7 @@ if __name__ == '__main__':
                        'License :: OSI Approved :: GNU General Public License (GPL)',
                        'License :: Free for non-commercial use',
                        'Operating System :: Unix',
-                       'Programming Language :: Python :: 2.7',
+                       'Programming Language :: Python :: 3.7',
                        'Topic :: Scientific/Engineering :: Bio-Informatics'],
           install_requires=install_requires)
 
