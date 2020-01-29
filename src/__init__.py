@@ -611,7 +611,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
             # select paired reads
             # sort by coordinates and print in SAM format
             # Remove duplicates
-            cmd = '''samtools merge -nf -h {0} - {1} |samtools fixmate -pr - - |samtools view -h -f 1 -|samtools sort -@ {2} -O SAM -T {3} -|python -c "import c3s;c3s.Algorithms._RmDup3()" >{3}.pairs'''.format(bams[0]," ".join(bams), max(nproc-3,1), prefix)
+            cmd = '''samtools merge -nf -h {0} - {1} |samtools fixmate -pr - - |samtools view -h -f 1 -|samtools sort -@ {2} -O SAM -T {3} -|python -c "import maxim;maxim.Algorithms._RmDup3()" >{3}.pairs'''.format(bams[0]," ".join(bams), max(nproc-3,1), prefix)
             Utils.touchtime(cmd)
             rc = call(cmd,shell=True)
             if rc != 0:
