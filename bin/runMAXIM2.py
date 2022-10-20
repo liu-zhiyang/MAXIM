@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -- coding:utf-8 --
-# Last-modified: 24 Jan 2020 12:19:41 PM
-#
-#         Module/Scripts Description
+# Last-modified: 20 Oct 2022
+# Errors were fixed and the pipeline can run successfully
+
+##########################################################################
+#                      Module/Scripts Description
 # 
 # Copyright (c) 2020 Rowan University
 # 
@@ -14,6 +16,7 @@
 # @design: Yong Chen <chenyong@rowan.edu>
 # @implementation: Yunfei Wang <yfwang0405@gmail.com>
 # @corresponding author:  Yong Chen <chenyong@rowan.edu>
+##########################################################################
 
 # ------------------------------------
 # python modules
