@@ -41,6 +41,7 @@ def argParser():
 
     pr = p.add_argument_group('Required')
     pr.add_argument("-f","--tbffile",dest="tbffile",type=str,metavar="pairs.gz",required=True,help="tbf file.")
+    pr.add_argument("-m","--mappingdir",dest="mappingdir",type=str,required=True,help="Mapping directory of previous mapping results.")
     #pr.add_argument("-x","--genome",dest="genome",type=str,metavar="hg38", required=True, help="Bowtie2 built genome.")
     #pr.add_argument("-1",dest="fq1",type=str,metavar='sample_R1.fastq.gz',nargs="+",required=True,help="Read 1 fastq file. Can be gzip(.gz) or bzip2(.bz2) compressed.")
     #pr.add_argument("-2",dest="fq2",type=str,metavar='sample_R2.fastq.gz',nargs="+",required=True,help="Read 2 fastq file. Can be gzip(.gz) or bzip2(.bz2) compressed.")
@@ -120,14 +121,19 @@ if __name__=="__main__":
     plotdir = args.wdir+"/020Plotting"
     plotdir = maxim.Utils.touchdir(plotdir)
     maxim.Utils.touchtime("Draw bait figures ...")
+    tbffile = args.tbffile
     tbf = maxim.TabixFile(tbffile,peaksize)
-    tbf.setChromSizes(bams[0])    
+    mappingdir = args.mappingdir
+    bams = [mappingdir+args.prefix+f for f in ["_R1.bam", "_R2.bam", "_R1_remap.bam", "_R2_remap.bam"]]
+    tbf.setChromSizes(bams[0])
+    tbf.peakstart = args.peakstart
+    tbf.peakend = args.peakend
     tbf.BaitStatsPlot(args.bait,
                       plotdir+args.prefix+"_stats.pdf",
                       extendsize=args.extendsize,
                       readlen=args.readlen,
                       smooth_window=args.smooth_window)
-    maxim.Utils.touchtime()
+    maxim.Utils.touchtime("BaitStatsPlotting Done ...")
 
     # Calculate intra- and inter-chrom interactions
     modeldir = args.wdir+"/030Model"
