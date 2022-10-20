@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -- coding:utf-8 --
-# Last-modified: 24 Jan 2020 12:20:11 PM
-#
-#         Module/Scripts Description
+# Last-modified: 20 Oct 2022
+# Errors were fixed and the pipline can run sucessfully now.
+
+
+######################################################################## 
+#                      Module/Scripts Description
 # 
 # Copyright (c) 2020 Rowan University
 # 
@@ -14,6 +17,7 @@
 # @design: Yong Chen <chenyong@rowan.edu>
 # @implementation: Yunfei Wang <yfwang0405@gmail.com>
 # @corresponding author:  Yong Chen <chenyong@rowan.edu>
+########################################################################
 
 # ------------------------------------
 # python modules
@@ -194,7 +198,7 @@ class TabixFile(object):
         import matplotlib.pyplot as plt
         sns.set_context('poster')
         sns.set_style('ticks')
-        fig = plt.figure(figsize=[10,10])
+        fig = plt.figure(figsize=[15,15])
         ax1 = plt.subplot2grid((20,10),(0,0),rowspan=10,colspan=4)
         ax2 = plt.subplot2grid((20,10),(0,6),rowspan=10,colspan=4)
         ax3 = plt.subplot2grid((20,10),(10,0),rowspan=3,colspan=10)
@@ -258,7 +262,7 @@ class TabixFile(object):
                 # check intra-chrom interactions
                 if ochrom==chrom and start<=opos<end: # same chrom
                     # idx = min(abs(opos-start), abs(opos-end))/peaksize
-                    idx = (opos-start)/peaksize
+                    idx = int((opos-start)/peaksize)
                     if idx < 2*nbins+1:
                         count[idx] += 1
             # discard the ones with zero links
@@ -275,7 +279,7 @@ class TabixFile(object):
         Utils.touchtime("Negative Binomial fitting ...")
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore")
-            ns, ps = list(zip(*cdf.apply(Algorithms.NBFit,axis=0)))
+            ns, ps = list(zip(*[cdf.apply(Algorithms.NBFit,axis=0)[col] for col in cdf]))
         if outfile:
             cdf.to_csv(outfile,sep='\t',index=None)
         self.intra_nb = pandas.DataFrame({'r':ns,'p':ps},index=cdf.columns)
@@ -356,7 +360,7 @@ class TabixFile(object):
                 inter_counts[ochrom].setdefault(idx,0)
                 inter_counts[ochrom][idx] += 1
                 read_pairs.append(items+[idx])
-        nbins = self.intra_nb.shape[0]/2
+        nbins = int(self.intra_nb.shape[0]/2)
 #        # intra pvalues
 #        Utils.touchtime("Calculate p values for intra-chrom interactions ...")
 #        with open(outprefix+"_intra_pval.tsv",'w') as ofh:
@@ -387,15 +391,15 @@ class TabixFile(object):
 #                    p = 1-stats.nbinom.cdf(inter_counts[chrom][idx],self.inter_ns[chrom],self.inter_ps[chrom])
 #                    print >>ofh, "{0}\t{1}\t{2}\t{3}\t{4}\t{5}".format(chrom,start,end,inter_counts[chrom][idx],p,numpy.ceil((1-p)/p/100))
         Utils.touchtime("Generate file for WashU browser ...")
-        with open(outprefix+"_wu.bedpairs",'w') as ofh:
+        with open(outprefix+"_wu.longrange",'w') as ofh:
             for chr1,start1,chr2,start2,idx in read_pairs:
                 if chr1 == chr2 : # intra
                     pcname = 'bin_{0}'.format(nbins if abs(idx) >nbins else abs(idx))
                     p = 1-stats.nbinom.cdf(intra_counts[idx],self.intra_nb.loc[pcname,'r'], self.intra_nb.loc[pcname,'p'])
-                    print("{0}:{1}-{2}\t{3}:{4}-{5}\t{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,min(150,numpy.ceil((1-p)/p/1000))), file=ofh)
+                    print("{0}\t{1}\t{2}\t{3}:{4}-{5},{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,min(150,numpy.ceil((1-p)/p/1000))), file=ofh)
                 elif chr2 in self.inter_ns: # inter
                     p = 1-stats.nbinom.cdf(inter_counts[chr2][idx],self.inter_ns[chr2],self.inter_ps[chr2])
-                    print("{0}:{1}-{2}\t{3}:{4}-{5}\t{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,-min(150,numpy.ceil((1-p)/p/100))), file=ofh)
+                    print("{0}\t{1}\t{2}\t{3}:{4}-{5},{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,-min(150,numpy.ceil((1-p)/p/100))), file=ofh)
 
 class IO(object):
     def mopen(infile,mode='r'):
@@ -403,7 +407,7 @@ class IO(object):
         if infile.endswith(".gz"):
             if 'b' not in mode:
                 mode += 'b'
-            return gzip.open(infile, mode)
+            return gzip.open(infile,mode)
         else:
             return open(infile,mode)
     mopen=staticmethod(mopen)
@@ -438,13 +442,13 @@ class IO(object):
             elif ftype=='fastq':
                 while True:
                     try:
-                        fid=fh.next().rstrip().lstrip('@')
-                        seq=fh.next().rstrip()
+                        fid = next(fh).decode().rstrip().lstrip('@')
+                        seq = next(fh).decode().rstrip()
                         next(fh)
-                        qual = fh.next().rstrip()
+                        qual = next(fh).decode().rstrip()
                         yield Fastq(fid,seq,qual)
-                    except:
-                        raise StopIteration
+                    except StopIteration:
+                        break
             else:
                 raise TypeError(ftype+" format is not supported.")
             assert False, "Do not reach this line."
@@ -511,7 +515,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
             return
         total = 0
         cnt = 0
-        with gzip.open(outfile,'wb') as ofh:
+        with gzip.open(outfile,'wt') as ofh:
             for fq in IO.seqReader(fqfile,'fastq'):
                 idx = fq.seq.find('GATC')  
                 total += 1
@@ -721,7 +725,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
             mapped_reads += total_reads2 - int(lines[2].split()[0])
         # passed qc
         with open(prefix+"_flagstat.log") as fh:
-            passqc = int(fh.next().split()[0])
+            passqc = int(fh.readlines()[0].split()[0])
         return total_reads-mapped_reads, mapped_reads-passqc, passqc
     ReadStats=staticmethod(ReadStats)
     def NBFit(cnts):
