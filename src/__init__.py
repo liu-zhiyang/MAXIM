@@ -451,7 +451,7 @@ class IO(object):
                         break
             else:
                 raise TypeError(ftype+" format is not supported.")
-            assert False, "Do not reach this line."
+                assert False, "Do not reach this line."
     seqReader=staticmethod(seqReader)
 
 class Algorithms(object):
