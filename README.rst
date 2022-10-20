@@ -1,7 +1,8 @@
-MAXIM 
+About MAXIM 
 =============================
 MAXIM is a model-based analysis and pipeline of dCas9 Capture-3C-Seq data of multiplexed version. It uses multiplescale Bayesian models for the significance calling of chromatin interactions. It oprovides a versatile and flexible pipeline to analyze the dCas9 Capture-3C-Seq data V2.0 from raw sequencing reads to chromatin loops. MAXIM integrates all steps required for the data analysis, and it supports the multiplexed version that uses batchs of multiple targets (sgRNAs) in one experiments.
 
+Original code can be found in https://github.com/ChenYong-RU/MAXIM, this repo is a fixed version of MAXIM.
 
 1. Prerequisition
 -------------------
@@ -31,6 +32,10 @@ MAXIM is a model-based analysis and pipeline of dCas9 Capture-3C-Seq data of mul
 
 3. Usage of MAXIM
 ----------------
+
+There are two python script to run MAXIM:
+  1. runMAXIM.py
+  2. runMAXIM2.py
 
 - Usage of runMAXIM.py
 
@@ -74,6 +79,46 @@ MAXIM is a model-based analysis and pipeline of dCas9 Capture-3C-Seq data of mul
 +--------------------------------------+--------------------------------------------------------------+
 |-p 10                                 |Number of processes. [Default=10].                            |
 +--------------------------------------+--------------------------------------------------------------+
+
+- Usage of runMAXIM2.py
+
+::
+
+  usage: runMAXIM2.py -f pairs.gz -m MAPPINGDIR --prefix prefix [--bait chr11:5305934] [--extendsize 100000]
+                    [--readlen 36] [--seed 1024] [--smooth-window 100] [--peakstart 5305834] [--peakend 5306034]
+                    [--nperm 10000] [-w "."] [-p 10]
+
+- Required parameters:
+
++--------------------------------------+--------------------------------------------------------------+
+|-f / --tbffile  pairs.gz              |tbffile of fixed mate pairs from runMAXIM.py                  |
++--------------------------------------+--------------------------------------------------------------+
+|-m / --mappingdir MAPPINGDIR          |Directory containing mapping results from runMAXIM.py         |
++--------------------------------------+--------------------------------------------------------------+
+|--prefix                              |Prefix of result files.                                       |
++--------------------------------------+--------------------------------------------------------------+
+
+
+- Optional parameters:
+
++--------------------------------------+--------------------------------------------------------------+
+|--bait chr11:5305934                  |Bait genomic locus. [Default="chr11:5305934"]                 |
++--------------------------------------+--------------------------------------------------------------+
+|--extendsize 100000                   |Length to be extended from bait regions. [Defaut=100000].     |
++--------------------------------------+--------------------------------------------------------------+
+|--readlen 36                          |Read length. [Default=36]                                     |
++--------------------------------------+--------------------------------------------------------------+
+|--seed 1024                           |Seed to generate random values. [Default=1024].               |
++--------------------------------------+--------------------------------------------------------------+
+|-smooth-window 101                    |Smooth window for peak size inference. [Default=101].         |
++--------------------------------------+--------------------------------------------------------------+
+|--nperm 10000                         |Number of permutatons. [Default=10000].                       |
++--------------------------------------+--------------------------------------------------------------+
+|-w "."                                |Working directory. [Default="."].                             |
++--------------------------------------+--------------------------------------------------------------+
+|-p 10                                 |Number of processes. [Default=10].                            |
++--------------------------------------+--------------------------------------------------------------+
+
 
 
 4. Demo examples:
