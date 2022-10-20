@@ -120,7 +120,9 @@ if __name__=="__main__":
     plotdir = maxim.Utils.touchdir(plotdir)
     maxim.Utils.touchtime("Draw bait figures ...")
     tbf = maxim.TabixFile(tbffile,peaksize)
-    tbf.setChromSizes(bams[0])    
+    tbf.setChromSizes(bams[0])
+    tbf.peakstart = args.peakstart
+    tbf.peakend = args.peakend    
     tbf.BaitStatsPlot(args.bait,
                       plotdir+args.prefix+"_stats.pdf",
                       extendsize=args.extendsize,
