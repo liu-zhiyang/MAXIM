@@ -1,4 +1,0 @@
-include install.sh
-include RELEASE
-include LICENSE
-include README.rst
