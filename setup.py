@@ -46,7 +46,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # includepy = "%s/include/python%s" % (sys.prefix, sys.version[:3])
-    with open("README.rst",'r') as fh:
+    with open("README.md",'r') as fh:
         long_description = fh.read()
         idx = long_description.find('\n')
         description = long_description[:idx].rstrip()
