@@ -90,6 +90,5 @@ if __name__ == '__main__':
                        'License :: Free for non-commercial use',
                        'Operating System :: Unix',
                        'Programming Language :: Python :: 3.7',
-                       'Topic :: Scientific/Engineering :: Bio-Informatics'],
-          install_requires=install_requires)
+                       'Topic :: Scientific/Engineering :: Bio-Informatics'])
 
