@@ -1,6 +1,8 @@
 #!/usr/bin/python
-#Last-modified: 24 Jan 2020 12:25:48 PM
+# Last-modified: 21 Oct 2022
+# Fixed version
 
+###########################################################################
 #         Module/Scripts Description
 # 
 # Copyright (c) 2020 Rowan University
@@ -13,6 +15,7 @@
 # @design: Yong Chen <chenyong@rowan.edu>
 # @implementation: Yunfei Wang <yfwang0405@gmail.com>
 # @corresponding author:  Yong Chen <chenyong@rowan.edu>
+############################################################################
 
 # ------------------------------------
 # python modules
@@ -58,15 +61,15 @@ if __name__ == '__main__':
         os.system('if [ -f {0}.egg-info ]; then rm {0}.egg-info; fi'.format(PROG))
         os.system('if [ -d {0}.egg-info ]; then rm -rf {0}.egg-info; fi'.format(PROG))
     
-    # install requirement
-    install_requires = [ ["numpy >= 1.4.1"]]
-    install_requires.append(["numpy >= 1.13.1",
-                             "pandas >= 0.15.2",
-                             "matplotlib >= 2.0.2",
-                             "seaborn >= 0.7.1",
-                             "pysam >= 0.11.2.2",
-                             "scipy >= 0.19.1",
-                             "statsmodels >=0.8.0"])
+    # install requirement, skipped. Manually install by conda.
+#    install_requires = [ ["numpy >= 1.4.1"]]
+#    install_requires.append(["numpy >= 1.13.1",
+#                             "pandas >= 0.15.2",
+#                             "matplotlib >= 2.0.2",
+#                             "seaborn >= 0.7.1",
+#                             "pysam >= 0.11.2.2",
+#                             "scipy >= 0.19.1",
+#                             "statsmodels >=0.8.0"])
     setup(name=PROG,
           version=VERSION,
           author='Yunfei Wang',
