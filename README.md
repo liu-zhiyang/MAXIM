@@ -137,5 +137,5 @@ cat `find . -name *wu.longrange` | sort -k1,1 -k2,2n | bgzip -c > mergeBaits.lon
 tabix -p bed mergeBaits.longrange.gz
 
 # virtualizing interactions
-# pleas open http://epigenomegateway.wustl.edu/browser/ , select proper genome, click tracks --> local tracks --> choose 'longrange -- long range interaction data in longrange format' --> choose track file "mergeBaits.longrange.gz"&"mergeBaits.longrange.gz.tbi"
+# please open http://epigenomegateway.wustl.edu/browser/ , select proper genome, click tracks --> local tracks --> choose 'longrange -- long range interaction data in longrange format' --> choose track file "mergeBaits.longrange.gz"&"mergeBaits.longrange.gz.tbi"
 ```
