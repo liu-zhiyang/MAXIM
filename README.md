@@ -115,3 +115,27 @@ Although `--bait`, `--peakstart` and `--peakend` are optional parameters, I find
 
 
 ## 4. Tutorial
+
+```
+# data preparation, example data were from GSE139109 titled CAPTURE-3C-seq_K562_sgHS1-5_combined
+wget -c ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR103/016/SRR10312416/SRR10312416_1.fastq.gz
+wget -c ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR103/016/SRR10312416/SRR10312416_2.fastq.gz
+
+# run MAXIM for the first round
+runMAXIM.py -x path/to/bowtie2_index/GRCh38 -1 SRR10312416_1.fastq.gz -2 SRR10312416_2.fastq.gz --prefix K562_sgLCR -w HS1 --bait "chr11:5274942-5276575" --nperm 10000 -p 16 --peakstart 5274942 --peakend 5276575
+# after MAXIM successfully end, you will get 3 folder under your work path "HS1".
+# 010ReadMapping contains data reqiured by futher running of MAXIM
+# 020Plotting
+# 030Modeling contains interaction data in longrang format for WashU Epigenome Browser virtualizing
+
+# run MAIM for another bait, this step can be repeated for more baits
+runMAXIM2.py -t HS1/010ReadMapping/K562_sgLCR.pairs.gz -m HS1/010ReadMapping/ --prefix K562_sgLCR -w HS2 --bait "chr11:5280070-5281875" --nperm 10000 -p 16 --peakstart 5280070 --peakend 5281875
+# note: you should set another uniq work for a new bait, otherwise the output might be overwrited
+
+# prepare your longrange data for virtualizing
+cat `find . -name *wu.longrange` | sort -k1,1 -k2,2n | bgzip -c > mergeBaits.longrange.gz
+tabix -p bed mergeBaits.longrange.gz
+
+# virtualizing interactions
+# pleas open http://epigenomegateway.wustl.edu/browser/ , select proper genome, click tracks --> local tracks --> choose 'longrange -- long range interaction data in longrange format' --> choose track file "mergeBaits.longrange.gz"&"mergeBaits.longrange.gz.tbi"
+```
