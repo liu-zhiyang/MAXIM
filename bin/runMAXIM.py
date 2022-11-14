@@ -77,7 +77,10 @@ if __name__=="__main__":
     # check parameters
     peaksize = None
     if args.peakstart!=-1 and args.peakend!=-1:
-        peaksize = args.peakend - args.peakstart
+        if args.peakstart==0 and args.peakend==0:
+            peaksize = None
+        else:
+            peaksize = args.peakend - args.peakstart
         maxim.Utils.touchtime("Use user defined peak size.")
     elif args.peakstart!=-1 or args.peakend!=-1:
         maxim.Utils.touchtime("ERROR: both '--peakstart' and '--peakend' should be provided.")
@@ -123,9 +126,7 @@ if __name__=="__main__":
     plotdir = maxim.Utils.touchdir(plotdir)
     maxim.Utils.touchtime("Draw bait figures ...")
     tbf = maxim.TabixFile(tbffile,peaksize)
-    tbf.setChromSizes(bams[0])
-    tbf.peakstart = args.peakstart
-    tbf.peakend = args.peakend    
+    tbf.setChromSizes(bams[0])    
     tbf.BaitStatsPlot(args.bait,
                       plotdir+args.prefix+"_stats.pdf",
                       extendsize=args.extendsize,
