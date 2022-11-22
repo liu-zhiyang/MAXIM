@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -- coding:utf-8 --
-# Last-modified: 20 Oct 2022
+# Last-modified: 22 Nov 2022
 # Errors were fixed and the pipeline can run successfully
 
 ##########################################################################
@@ -77,6 +77,7 @@ def argParser():
 if __name__=="__main__":
     args = argParser()
     # check parameters
+    peaksize = None
     if args.peakstart!=-1 and args.peakend!=-1:
         if args.peakstart==0 and args.peakend==0:
             peaksize = None
@@ -127,7 +128,9 @@ if __name__=="__main__":
     plotdir = maxim.Utils.touchdir(plotdir)
     maxim.Utils.touchtime("Draw bait figures ...")
     tbffile = args.tbffile
-    tbf = maxim.TabixFile(tbffile,peaksize)
+    peakstart = args.peakstart
+    peakend = args.peakend
+    tbf = maxim.TabixFile(tbffile,peaksize,peakstart,peakend)
     mappingdir = args.mappingdir
     bams = [mappingdir+args.prefix+f for f in ["_R1.bam", "_R2.bam", "_R1_remap.bam", "_R2_remap.bam"]]
     tbf.setChromSizes(bams[0])
