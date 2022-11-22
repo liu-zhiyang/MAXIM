@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -- coding:utf-8 --
-# Last-modified: 20 Oct 2022
+# Last-modified: 22 Nov 2022
 # Errors were fixed and the pipeline can run successfully
 
 ##########################################################################
@@ -125,8 +125,10 @@ if __name__=="__main__":
     plotdir = args.wdir+"/020Plotting"
     plotdir = maxim.Utils.touchdir(plotdir)
     maxim.Utils.touchtime("Draw bait figures ...")
-    tbf = maxim.TabixFile(tbffile,peaksize)
-    tbf.setChromSizes(bams[0])    
+    peakstart = args.peakstart
+    peakend = args.peakend
+    tbf = maxim.TabixFile(tbffile,peaksize,peakstart,peakend)
+    tbf.setChromSizes(bams[0])
     tbf.BaitStatsPlot(args.bait,
                       plotdir+args.prefix+"_stats.pdf",
                       extendsize=args.extendsize,
