@@ -109,10 +109,6 @@ usage: runMAXIM2.py -f pairs.gz -m MAPPINGDIR --prefix prefix [--bait chr11:5305
 | -p 10                | Number of processes. [Default=10].                        |
 
 
-**Note:** 
-
-Although `--bait`, `--peakstart` and `--peakend` are optional parameters, I find that they are all needed in the pipeline. So set them with proper value.
-
 
 ## 4. Tutorial
 
