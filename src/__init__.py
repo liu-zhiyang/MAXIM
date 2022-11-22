@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -- coding:utf-8 --
-# Last-modified: 20 Oct 2022
+# Last-modified: 22 Nov 2022
 # Errors were fixed and the pipline can run sucessfully now.
 
 
@@ -86,10 +86,12 @@ class TabixFile(object):
     '''
     Class for Tabix file.
     '''
-    def __init__(self,tbfile,peaksize=None):
+    def __init__(self,tbfile,peaksize=None,peakstart=0,peakend=0):
         self.closed = True
         self.infile = tbfile
         self.peaksize = peaksize
+        self.peakstart = peakstart
+        self.peakend = peakend
         if not os.path.isfile(self.infile+".tbi"):
             self.infile = pysam.tabix_index(self.infile,seq_col=0,start_col=1,end_col=1,zerobased=True)
         self.fh = pysam.Tabixfile(self.infile)
@@ -393,13 +395,15 @@ class TabixFile(object):
         Utils.touchtime("Generate file for WashU browser ...")
         with open(outprefix+"_wu.longrange",'w') as ofh:
             for chr1,start1,chr2,start2,idx in read_pairs:
+                start1 = int(start1)
+                start2 = int(start2)
                 if chr1 == chr2 : # intra
                     pcname = 'bin_{0}'.format(nbins if abs(idx) >nbins else abs(idx))
                     p = 1-stats.nbinom.cdf(intra_counts[idx],self.intra_nb.loc[pcname,'r'], self.intra_nb.loc[pcname,'p'])
-                    print("{0}\t{1}\t{2}\t{3}:{4}-{5},{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,min(150,numpy.ceil((1-p)/p/1000))), file=ofh)
+                    print("{0}\t{1}\t{2}\t{3}:{4}-{5},{6:.0f}".format(chr1,start1,start1+self.rlen,chr2,start2,start2+self.rlen,min(150,numpy.ceil((1-p)/p/1000))), file=ofh)
                 elif chr2 in self.inter_ns: # inter
                     p = 1-stats.nbinom.cdf(inter_counts[chr2][idx],self.inter_ns[chr2],self.inter_ps[chr2])
-                    print("{0}\t{1}\t{2}\t{3}:{4}-{5},{6:.0f}".format(chr1,start1,int(start1)+self.rlen,chr2,start2,int(start2)+self.rlen,-min(150,numpy.ceil((1-p)/p/100))), file=ofh)
+                    print("{0}\t{1}\t{2}\t{3}:{4}-{5},{6:.0f}".format(chr1,start1,start1+self.rlen,chr2,start2,start2+self.rlen,min(150,numpy.ceil((1-p)/p/100))), file=ofh)
 
 class IO(object):
     def mopen(infile,mode='r'):
@@ -645,7 +649,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
                 boundary of the bait region.
         '''
         avgd = depth.mean()*smooth_window
-        n, mid = len(depth), len(depth)/2
+        n, mid = int(len(depth)), int(len(depth)/2)
         left, right = 0, n
         # right boundary
         start = depth[mid]
@@ -666,7 +670,7 @@ samtools flagstat {prefix}.bam >{prefix}_flagstat.log
             winsum += depth[i] - start
             start = depth[i+smooth_window-1]
         # return the middle position
-        return left+smooth_window/2, right-smooth_window/2
+        return int(left+smooth_window/2), int(right-smooth_window/2)
     DeterminePeakSize=staticmethod(DeterminePeakSize)
     def RandomGenomicLoci(chroms,sizes,binsize=1000000, nloci=1000,seed=1024):
         '''
